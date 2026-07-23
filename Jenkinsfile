@@ -37,7 +37,7 @@ pipeline{
                 {
 
                 def token = "squ_517249cec8a2cea3fd52c77614f138f2f8813525"
-                def sonarQubeUrl = "http://15.237.126.131:9000/api"
+                def sonarQubeUrl = "http://15.237.126.131:9000/"
                 def componentKey = "com.devesh:restaurant-service"
                 def coverageThreshold = 80.0
 
