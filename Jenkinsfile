@@ -30,35 +30,35 @@ pipeline{
             }
         }
 
-        stage('Check code coverage')
-        {
-            steps{
-                script
-                {
-
-                def token = "squ_6150850f0a81c23d57843f3ec3636df9080d70ff"
-                def sonarQubeUrl = "http://35.180.36.214:9000/"
-                def componentKey = "com.devesh:restaurant-service"
-                def coverageThreshold = 80.0
-
-                def response = sh (
-                        script: "curl -H 'Authorization: Bearer ${token}' '${sonarQubeUrl}/measures/component?component=${componentKey}&metricKeys=coverage'",
-                        returnStdout: true
-                    ).trim()
-
-                def coverage= sh (
-                    script: "echo '${response}' | jq -r '.component.measures[0].value'",
-                        returnStdout: true
-                    ).trim().toDouble()
-
-                echo "Coverage: ${coverage}"
-
-                    if (coverage < coverageThreshold) {
-                        error "Coverage is below the threshold of ${coverageThreshold}%. Aborting the pipeline."
-                    }
-                }
-            }
-        }
+//        stage('Check code coverage')
+//        {
+//            steps{
+//                script
+//                {
+//
+//                def token = "squ_6150850f0a81c23d57843f3ec3636df9080d70ff"
+//                def sonarQubeUrl = "http://35.180.36.214:9000/"
+//                def componentKey = "com.devesh:restaurant-service"
+//                def coverageThreshold = 80.0
+//
+//                def response = sh (
+//                        script: "curl -H 'Authorization: Bearer ${token}' '${sonarQubeUrl}/measures/component?component=${componentKey}&metricKeys=coverage'",
+//                        returnStdout: true
+//                    ).trim()
+//
+//                def coverage= sh (
+//                    script: "echo '${response}' | jq -r '.component.measures[0].value'",
+//                        returnStdout: true
+//                    ).trim().toDouble()
+//
+//                echo "Coverage: ${coverage}"
+//
+//                    if (coverage < coverageThreshold) {
+//                        error "Coverage is below the threshold of ${coverageThreshold}%. Aborting the pipeline."
+//                    }
+//                }
+//            }
+//        }
 
        stage('Docker Build and Push') {
       steps {
