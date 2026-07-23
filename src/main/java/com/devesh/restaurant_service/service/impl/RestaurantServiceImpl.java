@@ -22,14 +22,19 @@ public class RestaurantServiceImpl implements RestaurantService {
     RestaurantRepo restaurantRepo;
 
 
+    @Autowired
+    RestaurantMapper restaurantMapper;
+
+
+
     @Override
     public RestaurantDto create(RestaurantDto restaurantDto)
     {
         try
         {
-            Restaurant restaurant= RestaurantMapper.INSTANCE.mapToRestaurant(restaurantDto);
+            Restaurant restaurant= restaurantMapper.mapToRestaurant(restaurantDto);
             Restaurant save=restaurantRepo.save(restaurant);
-            return  RestaurantMapper.INSTANCE.mapToRestaurantDto(save);
+            return  restaurantMapper.mapToRestaurantDto(save);
         }catch (Exception e)
         {
             throw new RuntimeException(e.getMessage());
@@ -42,10 +47,10 @@ public class RestaurantServiceImpl implements RestaurantService {
         {
             if(restaurantRepo.existsById(id)) {
                 Restaurant restaurant =restaurantRepo.findById(id).orElseThrow( () -> new RuntimeException(" Resource Not Found "));
-                    restaurant=RestaurantMapper.INSTANCE.mapToRestaurant(restaurantDto);
+                    restaurant=restaurantMapper.mapToRestaurant(restaurantDto);
                     restaurant.setId(id);
                 Restaurant save = restaurantRepo.save(restaurant);
-                return RestaurantMapper.INSTANCE.mapToRestaurantDto(save);
+                return restaurantMapper.mapToRestaurantDto(save);
             }else {
                 throw new RuntimeException(" User Not Found Exception ");
             }
@@ -58,15 +63,14 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<RestaurantDto> getAllRestaurant() {
         List<Restaurant> restaurantList=new ArrayList<>();
         restaurantList=restaurantRepo.findAll();
-        return restaurantList.stream().map(RestaurantMapper.INSTANCE::mapToRestaurantDto).collect(Collectors.toList());
+        return restaurantList.stream().map(restaurantMapper::mapToRestaurantDto).collect(Collectors.toList());
     }
 
     @Override
     public RestaurantDto getRestaurant(Long id) {
         Optional<Restaurant>restaurant=restaurantRepo.findById(id);
         if(restaurant.isPresent()) {
-            RestaurantDto restaurantDto = RestaurantMapper.INSTANCE.mapToRestaurantDto(restaurant.get());
-            return restaurantDto;
+            return restaurantMapper.mapToRestaurantDto(restaurant.get());
         }
         return new RestaurantDto();
     }

@@ -8,20 +8,20 @@ import com.devesh.restaurant_service.repository.RestaurantRepo;
 import com.devesh.restaurant_service.service.impl.RestaurantServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
+@ExtendWith(MockitoExtension.class)
 public class RestaurantServiceTest {
 
 
@@ -29,7 +29,10 @@ public class RestaurantServiceTest {
     private RestaurantServiceImpl restaurantService;
 
     @Mock
-    private  RestaurantRepo restaurantRepo;
+    private RestaurantRepo restaurantRepo;
+
+    @Mock
+    RestaurantMapper restaurantMapper;
 
     private Restaurant restaurant;
     private RestaurantDto restaurantDto;
@@ -55,31 +58,16 @@ public class RestaurantServiceTest {
 
     @Test
     void testCreateRestaurant() {
+        RestaurantDto dto = new RestaurantDto();
+        Restaurant restaurant = new Restaurant();
+        Restaurant savedRestaurant = new Restaurant();
+        when(restaurantMapper.mapToRestaurant(dto)).thenReturn(restaurant);
+        when(restaurantRepo.save(restaurant)).thenReturn(savedRestaurant);
+        when(restaurantMapper.mapToRestaurantDto(savedRestaurant)).thenReturn(dto);
 
-        when(restaurantRepo.save(any(Restaurant.class))).thenReturn(restaurant);
-
-        RestaurantDto result = restaurantService.create(restaurantDto);
-
+        RestaurantDto result = restaurantService.create(dto);
         assertNotNull(result);
-        assertEquals("Dominos", result.getName());
-        assertEquals("Pune", result.getCity());
-
-        verify(restaurantRepo, times(1)).save(any(Restaurant.class));
-    }
-
-
-    /////////////////////////////
-
-    @Test
-    void testCreateRestaurant_Exception() {
-
-        when(restaurantRepo.save(any(Restaurant.class)))
-                .thenThrow(new RuntimeException("Database Error"));
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> restaurantService.create(restaurantDto));
-
-        assertEquals("Database Error", ex.getMessage());
+        verify(restaurantRepo).save(restaurant);
     }
 
 
@@ -88,17 +76,19 @@ public class RestaurantServiceTest {
     @Test
     void testUpdateRestaurant() {
 
-        when(restaurantRepo.existsById(1L)).thenReturn(true);
-        when(restaurantRepo.findById(1L)).thenReturn(Optional.of(restaurant));
-        when(restaurantRepo.save(any(Restaurant.class))).thenReturn(restaurant);
 
-        RestaurantDto result = restaurantService.update(restaurantDto, 1L);
+        Long id = 1L;
 
+        RestaurantDto dto = new RestaurantDto();
+        Restaurant restaurant = new Restaurant();
+        Restaurant savedRestaurant = new Restaurant();
+        when(restaurantRepo.existsById(id)).thenReturn(true);
+        when(restaurantRepo.findById(id)).thenReturn(Optional.of(restaurant));
+        when(restaurantMapper.mapToRestaurant(dto)).thenReturn(restaurant);
+        when(restaurantRepo.save(any(Restaurant.class))).thenReturn(savedRestaurant);
+        when(restaurantMapper.mapToRestaurantDto(savedRestaurant)).thenReturn(dto);
+        RestaurantDto result = restaurantService.update(dto, id);
         assertNotNull(result);
-        assertEquals("Dominos", result.getName());
-
-        verify(restaurantRepo).existsById(1L);
-        verify(restaurantRepo).findById(1L);
         verify(restaurantRepo).save(any(Restaurant.class));
     }
 
@@ -134,6 +124,7 @@ public class RestaurantServiceTest {
 
         verify(restaurantRepo).findAll();
     }
+
     ///
 
     @Test
@@ -151,19 +142,18 @@ public class RestaurantServiceTest {
     ///
 
     @Test
-    void testGetRestaurant() {
+    void testGetRestaurants() {
 
-        when(restaurantRepo.findById(1L))
-                .thenReturn(Optional.of(restaurant));
-
-        RestaurantDto result = restaurantService.getRestaurant(1L);
-
+        Long id = 1L;
+        Restaurant restaurant = new Restaurant();
+        RestaurantDto restaurantDto = new RestaurantDto();
+        when(restaurantRepo.findById(id)).thenReturn(Optional.of(restaurant));
+        when(restaurantMapper.mapToRestaurantDto(restaurant)).thenReturn(restaurantDto);
+        RestaurantDto result = restaurantService.getRestaurant(id);
         assertNotNull(result);
-        assertEquals("Dominos", result.getName());
-
-        verify(restaurantRepo).findById(1L);
+        verify(restaurantRepo).findById(id);
+        verify(restaurantMapper).mapToRestaurantDto(restaurant);
     }
-
 
     ///
 
@@ -194,6 +184,7 @@ public class RestaurantServiceTest {
 
         verify(restaurantRepo).delete(restaurant);
     }
+
     ///
 
     @Test

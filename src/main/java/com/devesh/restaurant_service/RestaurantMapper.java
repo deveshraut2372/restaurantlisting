@@ -5,14 +5,11 @@ import com.devesh.restaurant_service.entity.Restaurant;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+
+@Mapper(componentModel = "spring")
 public interface RestaurantMapper {
-
-    RestaurantMapper INSTANCE= Mappers.getMapper(RestaurantMapper.class);
-
-    Restaurant mapToRestaurant(RestaurantDto restaurantDto);
 
     RestaurantDto mapToRestaurantDto(Restaurant restaurant);
 
-
+    Restaurant mapToRestaurant(RestaurantDto restaurantDto);
 }
