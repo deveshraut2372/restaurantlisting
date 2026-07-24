@@ -75,41 +75,85 @@ pipeline{
       }
     }
 
-stage('Update Image Tag In GitOps'){
-    steps {
+    stage('Update Image Tag In GitOps'){
+        steps {
 
-        deleteDir()
+            checkout([
+                $class: 'GitSCM',
+                branches: [[name: '*/master']],
+                userRemoteConfigs: [[
+                    credentialsId: 'github-ssh-key',
+                    url: 'git@github.com:deveshraut2372/deployement-files.git'
+                ]]
+            ])
 
-        checkout scmGit(
-            branches:[[name:'*/master']],
-            extensions:[],
-            userRemoteConfigs:[[
-                credentialsId:'github-ssh-key',
-                url:'git@github.com:deveshraut2372/deployement-files.git'
-            ]]
-        )
+            script {
 
-        script {
+                sh """
+                    echo "Before change:"
+                    cat aws/restaurant-menifest.yml
 
-            sh "cat aws/restaurant-menifest.yml"
+                    sed -i 's|image: namrata11111/restaurant-listing-service:.*|image: namrata11111/restaurant-listing-service:${VERSION}|' aws/restaurant-menifest.yml
 
-            sh """
-            sed -i 's|image:.*restaurant-listing-service:.*|image: namrata11111/restaurant-listing-service:${VERSION}|' aws/restaurant-menifest.yml
-            """
+                    echo "After change:"
+                    cat aws/restaurant-menifest.yml
+                """
 
-            sh "cat aws/restaurant-menifest.yml"
 
-            sh "git add aws/restaurant-menifest.yml"
+                sh """
+                    git config user.email "jenkins@example.com"
+                    git config user.name "jenkins"
 
-            sh "git commit -m 'Update image tag ${VERSION}'"
+                    git status
 
-            sshagent(['github-ssh-key']) {
-                sh "git push origin master"
+                    git add aws/restaurant-menifest.yml
+
+                    git commit -m "Update image tag ${VERSION}" || echo "No changes"
+
+                    git push origin HEAD:master
+                """
             }
         }
     }
-}
 
+
+//stage('Update Image Tag In GitOps'){
+//    steps {
+//
+//        deleteDir()
+//
+//        checkout scmGit(
+//            branches:[[name:'*/master']],
+//            extensions:[],
+//            userRemoteConfigs:[[
+//                credentialsId:'github-ssh-key',
+//                url:'git@github.com:deveshraut2372/deployement-files.git'
+//            ]]
+//        )
+//
+//        script {
+//
+//            sh "cat aws/restaurant-menifest.yml"
+//
+//            sh """
+//            sed -i 's|image:.*restaurant-listing-service:.*|image: namrata11111/restaurant-listing-service:${VERSION}|' aws/restaurant-menifest.yml
+//            """
+//
+//            sh "cat aws/restaurant-menifest.yml"
+//
+//            sh "git add aws/restaurant-menifest.yml"
+//
+//            sh "git commit -m 'Update image tag ${VERSION}'"
+//
+//            sshagent(['github-ssh-key']) {
+//                sh "git push origin master"
+//            }
+//        }
+//    }
+//}
+
+
+////////////////
 
 
 //    stage('Update Image Tag In GitOps'){
