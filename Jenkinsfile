@@ -80,20 +80,51 @@ pipeline{
         steps{
             checkout scmGit(branches :[[name:'*/master']], extensions:[],userRemoteConfigs:[[ credentialsId: 'github-ssh-key' , url: 'git@github.com:deveshraut2372/deployement-files.git']])
             script{
-                sh '''
-                    sed -i "s/image: namrata11111\\/restaurant-listing-service:${VERSION}/" aws/restaurant-menifest.yml
-                '''
+//                sh '''
+//                    sed -i "s/image: namrata11111\\/restaurant-listing-service:${VERSION}/" aws/restaurant-menifest.yml
+//                '''
+                sh """
+                sed -i 's|image: namrata11111/restaurant-listing-service:.*|image: namrata11111/restaurant-listing-service:${VERSION}|' aws/restaurant-menifest.yml
+                """
                 sh 'git checkout master '
                 sh 'git add .'
-                sh 'git commit -m "Update image tag "'
+//                sh 'git commit -m "Update image tag "'
+                sh 'git commit -m "Update image tag ${VERSION}" || true'
 
-              sshagent(['git-ssh'])
+              sshagent(['github-ssh-key'])
                 {
-                    sh('git push')
+                    sh('git push origin master')
                 }
             }
         }
     }
+
+
+//    stage('Update Image Tag In GitOps') {
+//        steps {
+//            checkout scmGit(
+//                branches: [[name: '*/master']],
+//                extensions: [],
+//                userRemoteConfigs: [[
+//                    credentialsId: 'github-ssh-key',
+//                    url: 'git@github.com:deveshraut2372/deployement-files.git'
+//                ]]
+//            )
+//
+//            script {
+//                sh """
+//                sed -i 's|image: namrata11111/restaurant-listing-service:.*|image: namrata11111/restaurant-listing-service:${VERSION}|' aws/restaurant-menifest.yml
+//                """
+//
+//                sh 'git add aws/restaurant-menifest.yml'
+//                sh 'git commit -m "Update image tag to ${VERSION}" || true'
+//
+//                sshagent(['github-ssh-key']) {
+//                    sh 'git push origin master'
+//                }
+//            }
+//        }
+//    }
 
 
     }
